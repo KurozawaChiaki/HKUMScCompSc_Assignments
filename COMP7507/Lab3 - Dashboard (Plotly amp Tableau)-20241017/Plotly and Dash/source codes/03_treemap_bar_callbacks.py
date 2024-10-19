@@ -48,6 +48,7 @@ def linkTreemapBarChart(hoverData):
     updateColor = copy.deepcopy(barColor)
     
     food = dataDict['food']
+    category = dataDict['category']
 
     if hoverData is not None and 'label' in hoverData['points'][0]: 
         # nothing is hovered on when 'label' is not in the dict or not on valid area
@@ -57,6 +58,13 @@ def linkTreemapBarChart(hoverData):
         if hoverLabel in food: # when hovering on any food
             updateColor[food.index(hoverLabel)] = 'red' # change these foods' color to red
             updateBar.update_traces(marker_color=updateColor) # update the bar chart
+
+        if hoverLabel in category:
+            for idx, f in enumerate(food):
+                if category[idx] == hoverLabel:
+                    updateColor[idx] = 'red'  # change these foods' color to red
+                    updateBar.update_traces(marker_color=updateColor)  # update the bar chart
+
     
     return updateBar
 
