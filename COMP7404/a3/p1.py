@@ -1,6 +1,7 @@
 import sys, grader, parse
 
 def play_episode(problem):
+    print(problem)
     experience = ''
     return experience
 
