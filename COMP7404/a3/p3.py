@@ -7,7 +7,6 @@ def value_iteration(problem):
     noise = problem["noise"]
     iterations = problem["iterations"]
     grid = problem["grid"]
-    policy = problem["policy"]
 
     d_offset = {
         "E": (0, 1),
