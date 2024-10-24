@@ -1,12 +1,3 @@
-"""
-discount: 1
-noise: 0.1
-livingReward: -0.01
-grid:
-    _    _    _    1
-    _    #    _   -1
-    S    _    _    _
-"""
 import copy, random
 
 
@@ -26,6 +17,15 @@ class QLearning:
         self.policy = [[" " for _ in range(self.m)] for _ in range(self.n)]
         self.start = (0, 0)
         self.exit_states = []
+        self.symbols = {
+            "N": "↑",
+            "E": "→",
+            "W": "←",
+            "S": "↓",
+            "x": "x",
+            "#": "#",
+            " ": " "
+        }
 
         for i in range(self.n):
             for j in range(self.m):
@@ -37,12 +37,14 @@ class QLearning:
                     self.exit_states.append((i, j))
                     self.policy[i][j] = "x"
 
+        print(self.exit_states)
+
 
     def get_action(self, location):
         if location in self.exit_states:
             return "x"
 
-        if self.policy[location[0]][location[1]] != "":
+        if self.policy[location[0]][location[1]] != " ":
             return random.choices(population = self.directions[self.policy[location[0]][location[1]]],
                                  weights = [1 - self.noise * 2, self.noise, self.noise])[0]
 
@@ -51,6 +53,16 @@ class QLearning:
 
     def get_max_q(self, location):
         return max(self.Q[location[0]][location[1]].values())
+
+
+    def print_policy(self):
+        res = ""
+        for i in range(self.n):
+            for j in range(self.m):
+                res += f"| {self.symbols[self.policy[i][j]]} |"
+            res += "\n"
+        res += "-----------------------\n"
+        print(res[:-1])
 
 
     def next_location(self, agent, d):
@@ -77,9 +89,14 @@ class QLearning:
 
 
     def get_new_policy(self, location):
+        if self.policy[location[0]][location[1]] == "x":
+            return "x"
+
         best_action = ""
         max_q = -float("inf")
         for action, value in self.Q[location[0]][location[1]].items():
+            if action == "x":
+                continue
             if value > max_q:
                 best_action = action
                 max_q = value
@@ -100,23 +117,38 @@ class QLearning:
             while action != "x":
                 action = self.get_action(agent)
                 value = 0.0
+                new_agent = copy.deepcopy(agent)
                 if action == "x":
                     value += int(self.grid[agent[0]][agent[1]])
                 else:
                     value += self.living_reward
                     next_location = self.next_location(agent, action)
                     value += self.discount * self.get_max_q(next_location)
+                    new_agent = next_location
 
-                Q[agent[0]][agent[1]][action] = (1 - self.alpha) * self.Q[agent[0]][agent[1]][action] + self.alpha * value
+                Q[agent[0]][agent[1]][action] = ((1 - self.alpha) * self.Q[agent[0]][agent[1]][action]
+                                                 + self.alpha * value)
                 policy[agent[0]][agent[1]] = self.get_new_policy(agent)
                 delta += abs(self.Q[agent[0]][agent[1]][action] - Q[agent[0]][agent[1]][action])
-                self.Q = Q
-                self.policy = policy
-                print(policy)
+                agent = new_agent
+
+            self.Q = Q
+            self.policy = policy
+            self.print_policy()
 
 
 def main():
-    
+    discount = 1
+    noise = 0.1
+    living_reward = -0.01
+    grid = [
+        ["_", "_", "_", "1"],
+        ["_", "#", "_", "-1"],
+        ["S", "_", "_", "_"],
+    ]
+    instance = QLearning(0.01, discount, noise, living_reward, grid)
+    instance.solve()
+
 
 if __name__ == "__main__":
     main()
