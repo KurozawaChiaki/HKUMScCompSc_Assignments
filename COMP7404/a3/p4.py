@@ -26,6 +26,8 @@ class QLearning:
             "#": "#",
             " ": " "
         }
+        self.epsilon = 0.6
+        self.exploration_count = 0
 
         for i in range(self.n):
             for j in range(self.m):
@@ -45,8 +47,19 @@ class QLearning:
             return "x"
 
         if self.policy[location[0]][location[1]] != " ":
-            return random.choices(population = self.directions[self.policy[location[0]][location[1]]],
-                                 weights = [1 - self.noise * 2, self.noise, self.noise])[0]
+            intend = self.policy[location[0]][location[1]]
+            random_action = list(self.actions.keys())
+            random_action.remove(intend)
+            exploration = random.choice(random_action)
+
+            res = random.choices(
+                population = [intend, exploration],
+                weights = [1 - self.epsilon, self.epsilon])[0]
+            self.exploration_count += 1
+            if self.exploration_count >= 200:
+                self.exploration_count = 0
+                self.epsilon -= 0.05
+            return res
 
         return random.choice(list(self.actions.keys()))
 
@@ -66,6 +79,11 @@ class QLearning:
 
 
     def next_location(self, agent, d):
+        d = random.choices(
+            population = self.directions[d],
+            weights = [1 - 2 * self.noise, self.noise, self.noise]
+        )[0]
+
         x = agent[0] + self.actions[d][0]
         y = agent[1] + self.actions[d][1]
 
@@ -115,6 +133,7 @@ class QLearning:
             policy = copy.deepcopy(self.policy)
             action = ""
             while action != "x":
+                # print(agent)
                 action = self.get_action(agent)
                 value = 0.0
                 new_agent = copy.deepcopy(agent)
