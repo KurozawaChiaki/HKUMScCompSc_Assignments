@@ -67,19 +67,32 @@ class QLearning:
         # choose the "best" action according to Q values
         best_action = self.get_new_policy(location, self.Q[location[0]][location[1]])
 
+        # the epsilon-greedy process
         if random.uniform(0, 1) < self.epsilon:
             available_actions = [action for action in self.actions]
             chosen_action = random.choice(available_actions)
         else:
             chosen_action = best_action
 
+        # epsilon will decay every time the epsilon-greedy algorithm runs
         self.epsilon *= self.epsilon_decay
         return chosen_action
 
     def get_max_q(self, location):
+        """
+        Get the maximum Q value for the given location.
+
+        :param location:  the location of the agent now
+        :return:          the maximum Q value
+        """
         return max(self.Q[location[0]][location[1]].values())
 
     def print_policy(self):
+        """
+        Print the current policy.
+
+        :return: string containing the current policy
+        """
         res = ""
         for i in range(self.n):
             for j in range(self.m):
@@ -89,6 +102,14 @@ class QLearning:
         print(res[:-1])
 
     def next_location(self, agent, intended_direction):
+        """
+        Get the location where the given agent is after taking action.
+
+        :param agent:               agent location now
+        :param intended_direction:  the action agent should take
+        :return:                    the location next
+        """
+        # The agent may not get the right location
         chosen_direction = random.choices(
             population=self.directions[intended_direction],
             weights=[1 - 2 * self.noise, self.noise, self.noise]
@@ -101,6 +122,12 @@ class QLearning:
         return agent
 
     def check_complete(self, policy):
+        """
+        Check if the policy is identical to the previous one
+
+        :param policy: new policy
+        :return:       whether the policy is identical to the previous one
+        """
         for i in range(self.n):
             for j in range(self.m):
                 if policy[i][j] != self.policy[i][j]:
@@ -108,6 +135,14 @@ class QLearning:
         return True
 
     def get_new_policy(self, location, Q_cell):
+        """
+        Get the new policy for the given location according to new Q value.
+
+        :param location:  the given location
+        :param Q_cell:    new Q value
+        :return:          new policy
+        """
+        # If the agent can only exit
         if self.policy[location[0]][location[1]] == "x":
             return "x"
 
@@ -123,8 +158,12 @@ class QLearning:
         return best_action
 
     def solve(self):
+        """
+        The Q Learning Process
+        """
         iteration = 0
         complete = False
+        # We need the Q Learning run enough times in order to get optimal policy
         while (not complete) or iteration < 1000:
             agent = self.start
             iteration += 1
@@ -132,10 +171,10 @@ class QLearning:
             policy = copy.deepcopy(self.policy)
             action = ""
             while action != "x":
-                print(f"{action} {agent}")
                 action = self.get_action(agent)
-                value = 0.0
                 new_agent = copy.deepcopy(agent)
+
+                value = 0.0
                 if action == "x":
                     value += int(self.grid[agent[0]][agent[1]])
                 else:
@@ -157,6 +196,7 @@ class QLearning:
 
 
 def main():
+    # BASIC DATA IN P3 CASE 2
     discount = 1
     noise = 0.1
     living_reward = -0.01
