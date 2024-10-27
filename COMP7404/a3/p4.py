@@ -1,7 +1,12 @@
 """
 The data has been hard coded in the program, thus just click run.
 However, if there is a demand of changing parameters, modifying variables in main() function is available.
-The policy calculated in each iteration will be printed in the terminal.
+The final policy calculated for each attempt will be printed in the terminal.
+
+From the result, it's easy to find that most of the cells can get an optimal action, while the policy of starting
+location often leads to a crash into a wall. It's possible that due to the discount and living reward are pretty
+loose for wasting time crashing into walls, this kind of action may not lead the agent to further punishment.
+Introducing extra discount can improve the result a lot according to my own experiment.
 """
 import copy, random
 
@@ -10,7 +15,7 @@ class QLearning:
     """
     The main class of implementing Q Learning
     """
-    def __init__(self, alpha, discount, noise, living_reward, grid, eps=1e-6):
+    def __init__(self, alpha, discount, noise, living_reward, grid, eps = 1e-6):
         """
         Initialization of the instance
 
@@ -39,9 +44,9 @@ class QLearning:
             "N": "↑", "E": "→", "W": "←", "S": "↓",
             "x": "x", "#": "#", " ": " "
          }
-        self.epsilon = 0.6              # Here is the epsilon for epsilon-greedy algorithm
-        self.epsilon_decay = 0.995      # Decay rate for epsilon
-        self.alpha_decay = 0.995        # Decay rate for alpha (learning rate)
+        self.epsilon = 0.7                 # Here is the epsilon for epsilon-greedy algorithm
+        self.epsilon_decay = 1 - 1e-5      # Decay rate for epsilon
+        self.alpha_decay = 1 - 1e-5        # Decay rate for alpha (learning rate)
 
         # Initialize important parameters
         for i in range(self.n):
@@ -70,6 +75,7 @@ class QLearning:
         # the epsilon-greedy process
         if random.uniform(0, 1) < self.epsilon:
             available_actions = [action for action in self.actions]
+            available_actions.remove(best_action)
             chosen_action = random.choice(available_actions)
         else:
             chosen_action = best_action
@@ -85,6 +91,9 @@ class QLearning:
         :param location:  the location of the agent now
         :return:          the maximum Q value
         """
+        if location in self.exit_states:
+            return self.Q[location[0]][location[1]]["x"]
+
         return max(self.Q[location[0]][location[1]].values())
 
     def print_policy(self):
@@ -160,11 +169,13 @@ class QLearning:
     def solve(self):
         """
         The Q Learning Process
+
+        :return: the optimal policy
         """
         iteration = 0
         complete = False
         # We need the Q Learning run enough times in order to get optimal policy
-        while (not complete) or iteration < 1000:
+        while (not complete) or iteration < 5000:
             agent = self.start
             iteration += 1
             Q = copy.deepcopy(self.Q)
@@ -191,8 +202,9 @@ class QLearning:
 
             complete = self.check_complete(policy)
             self.policy = policy
-            self.print_policy()
             self.alpha *= self.alpha_decay
+
+        return self.policy
 
 
 def main():
@@ -205,8 +217,13 @@ def main():
         ["_", "#", "_", "-1"],
         ["S", "_", "_", "_"],
     ]
-    instance = QLearning(0.01, discount, noise, living_reward, grid)
-    instance.solve()
+
+    run_times = int(input("NUMBER OF ATTEMPT: "))
+    for _ in range(run_times):
+        instance = QLearning(0.01, discount, noise, living_reward, grid)
+        instance.solve()
+        print(f"ATTEMPT {_ + 1}: ")
+        instance.print_policy()
 
 
 if __name__ == "__main__":
