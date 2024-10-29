@@ -41,12 +41,25 @@ def interpolation(left_data, right_data, t, method='linear', return_first_key=Tr
     '''
     ########## Code Start ############
     if method == 'linear':
-        
-        
+        for i in range(1, t + 1):
+            res.append(left_data + (right_data - left_data) * (i / t))
+            
         return res
     elif method == 'slerp':
-        
-        
+        interp_rots = []
+        for joint_idx in range(left_data.shape[0]):
+            key_rots = R.from_quat([left_data[joint_idx], right_data[joint_idx]])
+            key_frames = [0, 1]
+            slerp = Slerp(key_frames, key_rots)
+            new_key_frames = np.linspace(0, 1, t + 1)
+            interp_rots.append(slerp(new_key_frames)[:-1])
+
+        for frame in range(0, t):
+            frame_rot = []
+            for joint_idx in range(left_data.shape[0]):
+                frame_rot.append(interp_rots[joint_idx][frame])
+            res.append(np.array(frame_rot))
+
         return res
     ########## Code End ############
 
@@ -143,7 +156,6 @@ def concatenate_two_motions(motion1, motion2, last_frame_index, start_frame_indx
     # between_local_rot = interpolation(?, ?, between_frames, 'slerp')
     
     ########## Code End ############
-    
     res = motion1.raw_copy()
     res.local_joint_positions = np.concatenate([motion1.local_joint_positions[:real_i],
                                                 between_local_pos,
@@ -154,6 +166,7 @@ def concatenate_two_motions(motion1, motion2, last_frame_index, start_frame_indx
                                                     motion2.local_joint_rotations[real_j:]], 
                                                     axis=0)
     return res
+
 
         
 def part2_concatenate(viewer, between_frames, do_interp=True):
