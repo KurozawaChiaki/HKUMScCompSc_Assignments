@@ -447,18 +447,8 @@ def main():
     All the variable name can be found in the feature_mapping variable
     '''
     
-    # selected_feature_names = ['trajectoryPos2D', 'trajectoryRot2D']
-    # selected_feature_weights = [1, 1]
-    
-    # selected_feature_names = ['lFootPos', 'rFootPos']
-    # selected_feature_weights = [0.75, 0.75]
-
-    selected_feature_names = ['lFootPos', 'rFootPos', 'lHandPos', 'rHandPos']
-    selected_feature_weights = [0.75, 0.75, 0.75, 0.75]
-
-    # selected_feature_names = ['lFootPos', 'rFootPos', 'lFootVel', 'rFootVel']
-    # selected_feature_weights = [0.75, 0.75, 1, 1]
-
+    selected_feature_names = ['trajectoryPos2D', 'trajectoryRot2D', 'lFootVel', 'rFootVel', 'lFootPos', 'rFootPos', 'lHandVel', 'rHandVel']
+    selected_feature_weights = [1, 1, 1, 1, 0.8, 0.8, 0.4, 0.4]
 
     assert len(selected_feature_names) == len(selected_feature_weights)
     

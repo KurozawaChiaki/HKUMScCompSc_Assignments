@@ -153,15 +153,16 @@ def concatenate_two_motions(motion1, motion2, last_frame_index, start_frame_indx
     min_idx = np.argmin(sim_matrix)
     i, j = min_idx // sim_matrix.shape[1], min_idx % sim_matrix.shape[1]
     real_i, real_j = i + last_frame_index - searching_frames, j + max(0, start_frame_indx - searching_frames)
-    
+
+    # modify the root position
     motion2.local_joint_positions = (motion2.local_joint_positions
-                                     - motion2.local_joint_positions[real_j]
-                                     + motion1.local_joint_positions[real_i])
-    
+                                    - motion2.local_joint_positions[real_j]
+                                    + motion1.local_joint_positions[real_i])
+
     between_local_pos = interpolation(motion1.local_joint_positions[real_i], motion2.local_joint_positions[real_j],
-                                      between_frames, 'linear')
+                                  between_frames, 'linear')
     between_local_rot = interpolation(motion1.local_joint_rotations[real_i], motion2.local_joint_rotations[real_j],
-                                      between_frames, 'slerp')
+                                  between_frames, 'slerp')
     ########## Code End ############
     res = motion1.raw_copy()
     res.local_joint_positions = np.concatenate([motion1.local_joint_positions[:real_i],
@@ -204,7 +205,7 @@ def part2_concatenate(viewer, between_frames, do_interp=True):
 def main():
     viewer = SimpleViewer()  
    
-    part1_key_framing(viewer, 10, 10)
+    # part1_key_framing(viewer, 10, 10)
     # part1_key_framing(viewer, 10, 5)
     # part1_key_framing(viewer, 10, 20)
     # part1_key_framing(viewer, 10, 30)
