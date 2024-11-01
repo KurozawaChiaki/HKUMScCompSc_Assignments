@@ -44,7 +44,6 @@ class MetaData:
         path_name = [self.joint_name[i] for i in path]
         return path, path_name, path1, path2
 
-
 def inverse_kinematics(meta_data, global_joint_positions, global_joint_orientations, target_pose, method='ccd'):
     path, path_name, path1, path2 = meta_data.get_path_from_root_to_end()
 
@@ -91,14 +90,19 @@ def inverse_kinematics(meta_data, global_joint_positions, global_joint_orientati
                 '''
                 
                 ########## Code Start ############
-                
+                vec_current2end = norm(chain_positions[end_idx] - chain_positions[current_idx])
+                vec_current2target = norm(target_pose - chain_positions[current_idx])
 
+                dot_product = np.vdot(vec_current2end, vec_current2target)
+                if np.isnan(dot_product):
+                    continue
+                angle = np.arccos(np.clip(dot_product, -1.0, 1.0))
 
+                axis = norm(np.cross(vec_current2end, vec_current2target))
+                rot_vec = R.from_rotvec(angle * axis)
 
-
-
-
-                
+                new_orientation = rot_vec * chain_orientations[current_idx]
+                chain_orientations[current_idx] = new_orientation
                 ########## Code End ############
 
                 chain_local_rotations = [chain_orientations[0]] + [chain_orientations[i].inv() * chain_orientations[i + 1] for i in range(len(path) - 1)]

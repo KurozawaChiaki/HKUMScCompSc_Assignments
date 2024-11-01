@@ -6,12 +6,12 @@ from viewer import SimpleViewer
 
 
 def part1_show_T_pose(viewer, joint_names, joint_parents, joint_offsets):
-    '''
-    A function to show the T-pose of the skeleton
-    joint_names:    Shape - (J)     a list to store the name of each joit
-    joint_parents:  Shape - (J)     a list to store the parent index of each joint, -1 means no parent
-    joint_offsets:  Shape - (J, 1, 3)  an array to store the local offset to the parent joint
-    '''
+    """
+        A function to show the T-pose of the skeleton
+        joint_names:    Shape - (J)     a list to store the name of each joint
+        joint_parents:  Shape - (J)     a list to store the parent index of each joint, -1 means no parent
+        joint_offsets:  Shape - (J, 1, 3)  an array to store the local offset to the parent joint
+    """
     global_joint_position = np.zeros((len(joint_names), 3))
     for joint_idx, parent_idx in enumerate(joint_parents):
         '''
@@ -34,8 +34,8 @@ def part1_show_T_pose(viewer, joint_names, joint_parents, joint_offsets):
                    else, the current joint global position = the sum of all parent joint offsets
         '''
         ########## Code Start ############
-
-
+        if parent_idx != -1:
+            global_joint_position[joint_idx] = global_joint_position[parent_idx] + joint_offsets[joint_idx]
         ########## Code End ############
         viewer.set_joint_position_by_name(joint_names[joint_idx], global_joint_position[joint_idx])
 
@@ -43,16 +43,16 @@ def part1_show_T_pose(viewer, joint_names, joint_parents, joint_offsets):
 
 
 def part2_forward_kinametic(viewer, joint_names, joint_parents, joint_offsets, joint_positions, joint_rotations, show_animation=False):
-    '''
+    """
     A function to calculate the global joint positions and orientations by FK
     F: Frame number;  J: Joint number
-   
-    joint_names:    Shape - (J)     a list to store the name of each joit
+
+    joint_names:    Shape - (J)     a list to store the name of each joint
     joint_parents:  Shape - (J)     a list to store the parent index of each joint, -1 means no parent
     joint_offsets:  Shape - (J, 1, 3)  an array to store the local offset to the parent joint
     joint_positions:    Shape - (F, J, 3)   an array to store the local joint positions
     joint_rotations:    Shape - (F, J, 4)   an array to store the local joint rotation in quaternion representation
-    '''
+    """
     joint_number = len(joint_names)
     frame_number = joint_rotations.shape[0]
 
@@ -86,8 +86,18 @@ def part2_forward_kinametic(viewer, joint_names, joint_parents, joint_offsets, j
                
     '''
     ########## Code Start ############
-    
-
+    for frame in range(frame_number):
+        for joint_idx, parent_idx in enumerate(joint_parents):
+            if parent_idx == -1:
+                global_joint_positions[frame][joint_idx] = joint_positions[frame][joint_idx]
+                global_joint_orientations[frame][joint_idx] = joint_rotations[frame][joint_idx]
+            else:
+                rotation = R.from_quat(joint_rotations[frame][joint_idx])
+                global_joint_orientations[frame][joint_idx] = (R.from_quat(global_joint_orientations[frame][parent_idx])
+                                                               * rotation).as_quat()
+                global_joint_positions[frame][joint_idx] = (global_joint_positions[frame][parent_idx]
+                                                            + R.from_quat(global_joint_orientations[frame][parent_idx])
+                                                            .apply(joint_offsets[joint_idx]))
     ########## Code End ############
     if not show_animation:
         show_frame_idx = 0
@@ -117,7 +127,7 @@ def main():
 
     '''
     Basic data terms in BVH format:
-        joint_names:    Shape - (J)     a list to store the name of each joit
+        joint_names:    Shape - (J)     a list to store the name of each joint
         joint_parents:  Shape - (J)     a list to store the parent index of each joint, -1 means no parent
         channels:       Shape - (J)     a list to store the channel number of each joint
         joint_offsets:  Shape - (J, 1, 3)  an array to store the local offset to the parent joint
@@ -128,10 +138,10 @@ def main():
     _, local_joint_positions, local_joint_rotations = bvh_reader.load_motion_data(bvh_file_path)
 
     # part 1
-    part1_show_T_pose(viewer, joint_names, joint_parents, joint_offsets)
+    # part1_show_T_pose(viewer, joint_names, joint_parents, joint_offsets)
 
     # part 2
-    # part2_forward_kinametic(viewer, joint_names, joint_parents, joint_offsets, local_joint_positions, local_joint_rotations, show_animation=True)
+    part2_forward_kinametic(viewer, joint_names, joint_parents, joint_offsets, local_joint_positions, local_joint_rotations, show_animation=True)
 
 
 if __name__ == "__main__":
