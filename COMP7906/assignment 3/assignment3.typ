@@ -60,3 +60,29 @@ Apart from these properties mentioned in the slides, the cryptographic hash func
 The length of the output of the hash function is fixed as well.
 
 = Q4
+== Which of the above approach is wrong?
+The third approach are wrong.
+
+B has the public key $A_("pub")$ corresponding to A's secret key $A_("prv")$. 
+So what B can obtain from the ciphertext is two copies of $H(M)$. Due to the properties of cryptographic hash function, B cannot know the plaintext $M$ even in the situation of knowing the hash function. In this approach, B cannot get the message $M$.
+
+However, the first approach is also problematic because it cannot guarantee the integrity of the message.
+
+== Which one is most efficient? And which one is least efficient?
+The fourth one is the most efficient approach, and the first one is least efficient.
+
+The fourth approach use asymmetric encryption to encrypt the symmetric encryption key $K$, which is much shorter than the megabytes-long message, and then use block cipher encryption to encrypt and decrypt the message. Compared to the other two approach, the fourth approach avoids using the asymmetric encryption method on long messages.
+
+The first approach applys the asymmetric encryption method on long messages twice, due to the asymmetric encryption method will not reduce the length of the text. So it is the least efficient approach compared with the second approach which only applys the public key operation once every time.
+
+
+= Q5
+For 1024-bit RSA, the number of operations is roughly $1024^3$.
+And for 2048-bit RSA, the number of operations is roughly $2048^3$.
+
+The ratio of operations required for 2048-bit integers to that for 1024-bit integers:
+$ "Ratio" = frac(2048^3, 1024^3) = 8 $
+Thus, the performance deteriorates by a factor of 8 when moving from 1024-bit to 2048-bit RSA.
+
+
+= Q6
