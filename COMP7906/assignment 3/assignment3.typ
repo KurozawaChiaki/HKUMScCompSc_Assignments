@@ -13,7 +13,10 @@ The screenshot of the PKC of #link("www.google.com") in Firefox is shown above.
 The issuer of the PKC is *Google Trust Services LLC* according to the detailed information.
 
 == Signing algorithm and the key length
-In Firefox, the signing algorithm is shown as *RSA*. And the key length of it is *4096 bits*.
+#image("images/algorithm.png")
+In Firefox, the signing algorithm is shown as *Elliptic Curve*. And the key length of it is *256 bits*.
+
+However, for its superior certificate, which are shown as _WR2_ and _GTS Root R1_ above, the algorithm is *RSA*, and the key lengths are *2048* and *4096*. 
 
 
 = Q2
