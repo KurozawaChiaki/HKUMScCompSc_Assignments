@@ -86,3 +86,26 @@ Thus, the performance deteriorates by a factor of 8 when moving from 1024-bit to
 
 
 = Q6
+1. _Customer (C) selects items (I) and confirm the order (O), and send the request purchase(C,I,O) to the shop._
+
+2. Shop (S) calculates the total cost of the order (TotalCost), and send a message (S, TotalCost, C, O) to the customer.
+
+3. Customer sends payment request to the bank with the message $"Enc"_(K_("cust"))(C, "TotalCost", S)$. Here, $C$ represents the bank account of the customer. Since we can assume communications between them are secure, it's not necessary to use generated random numbers to prevent attacks.
+
+4. The bank receive the payment request and process the payment. After the transaction is done, the bank sends back the receipt: $"Enc"_(K_("cust"))("Enc"_(K_("shop"))(C, "TotalCost", S))$.
+
+5. The customer receives the receipt and decrypts it with the shared key between the bank and the customer $K_("cust")$, and sends the message to the shop: $("Enc"_(K_("shop"))(C, "TotalCost", S), C, O)$.
+
+6. The shop receives the message and decrypts it with the shared key between the bank and the shop $K_("shop")$, and get the proof of the customer C has paid TotalCost through the bank. After checking the corresponding C and O, the shop sends the confirmation to the customer.
+
+For the four requirements:
+1. *The bank does not know what items are purchased by the customer*: The bank is only made aware of the TotalCost and the order number, but it does not know the individual items being purchased. The item list is never sent to the bank.
+
+2. *The shop does not know how the customer makes the payment*: The shop receives a Receipt from the customer, but it does not have any details about the customer’s bank account or payment method. The shop only knows that the payment was processed by the bank.
+
+3. *The customer has proof of payment*: The bank sends a Receipt to the customer, which acts as cryptographic proof that the payment was made. The customer can present this receipt to the shop.
+
+4. *No direct communication between the bank and the shop during the payment process*: The bank and the shop do not need to communicate during the transaction. The customer forwards the Receipt to the shop. The shop can verify the receipt with the shared key $K_("shop")$ after receiving it from the customer.
+
+
+= Q7
