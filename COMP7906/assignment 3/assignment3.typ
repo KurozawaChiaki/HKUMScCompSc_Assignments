@@ -111,7 +111,7 @@ Thus, the performance deteriorates by a factor of 8 when moving from 1024-bit to
 
 = Q6
 
-1. _Customer (C) selects items (I) and confirm the order (O), and send the request purchase(C,I,O) to the shop._
+1. _Customer (C) selects items (I) and confirm the order (O), and send the request purchase(C, I, O) to the shop._
 
 2. Shop (S) calculates the total cost of the order (TotalCost), and send a message (S, TotalCost, C, O) to the customer.
 
@@ -147,12 +147,19 @@ The user sends a request to upload a document to the server, which includes the 
 
 Specifically, for class "E" documents, the user should also send the list of members who can view the document.
 
-== If a user want to comment on a document / comments
+== If a user want to comment on a document/comment
 
-The user sends a request of commenting on a specific document/comment that includes the operation identifier, the object's identifier and the user identifier. After receiving the request, the server checks user's class first to determine whether the user can comment on the specific document/comment. If the comment is class "G", the user sends the comment directly to the server combined with the signature. Fot class "C" and "E", like posting documents, the server comes up with a generated AES key which will be used to encrypt the content of the comment, and sends it using user's public key. The user encrypts the document with the received AES key, and sends it to the server combined with the signature calculated using asymmetric encryption method. After server confirms the availability of the message, it will store the comment.
+The user sends a request of commenting on a specific document/comment that includes the operation identifier, the object's identifier and the user identifier. After receiving the request, the server checks user's class first to determine whether the user can comment on the specific document/comment. If the comment is class "G", the user sends the comment directly to the server combined with the signature. For class "C" and "E", like posting documents, the server comes up with a generated AES key which will be used to encrypt the content of the comment, and sends it using user's public key. The user encrypts the document with the received AES key, and sends it to the server combined with the signature calculated using asymmetric encryption method. After server confirms the availability of the message, it will store the comment.
 
 Specifically, for class "E" comments, the user should send the list of members who can view the document as well.
 
-== If a user want to access other's documents
+== If a user want to access other's document/comment
 
+The user sends a request of accessing a specific document/comment that includes the operation identifier, the object's identifier and the user identifier. After receiving the request, the server checks user's class first to determine whether the user can access the specific document/comment. 
 
+If the object is of class "G", the server will transport the content directly to the user.
+
+Otherwise, if the user can access the document/comment, the server transports the AES key encrypted using user's public key and encrypted content to the user. Then the user can view the content. However, due to the lack of the correct signature which signed using the owner's private key, the user cannot modify the content.
+
+== If a user want to modify a document
+The user sends a request of accessing a specific document/comment that includes the operation identifier, the object's identifier and the user identifier. After receiving the requst, the server should verify if the user is the document's owner. So the server sends a newly-generated AES key to the user encrypted using owner's public key. In order to modify the document, the user should respond with a message including modified document with the signature (encrypted using new AES key). So that the server can make sure the identity of the user and apply the modification.
