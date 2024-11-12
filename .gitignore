@@ -1,4 +1,4 @@
 .idea
 .vscode
 __pycache__
-./COMP7404/a4/datasets
+/COMP7404/a4/datasets/
