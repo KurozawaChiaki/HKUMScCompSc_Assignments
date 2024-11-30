@@ -94,8 +94,8 @@ def initial():
     # Hint: You can use the function ti.Matrix.dot to compute v^T*v
     # Hint: You can use the function ti.Matrix.identity(float, 3) to get a 3x3 identity matrix
     for i in ti.grouped(particle_vertices):
-        # inertia += particle_mass * ((particle_vertices[i] - body_cm_position[None]).dot(
-        pass
+        v = particle_vertices[i] - body_cm_position[None]
+        inertia += particle_mass * (v.dot(v) * ti.Matrix.identity(float, 3) - ti.Matrix.outer_product(v, v))
 
     # Compute the inverse inertia of the body and store it in the field
     body_origin_inverse_inertia[None] = inertia.inverse()
@@ -143,7 +143,7 @@ def substep():
     # computer the force on each particle
     for i in ti.grouped(particle_vertices):
         # TODO 2: gravity
-        # particle_force[i] =
+        particle_force[i] = particle_mass * gravity[None]
 
         # Collision force, we use a spring model to simulate the collision
         if particle_vertices[i][1] < -1:
@@ -166,25 +166,26 @@ def substep():
     body_force = ti.Vector([0.0, 0.0, 0.0])
     for i in ti.grouped(particle_vertices):
         # TODO 3: compute the force for rigid body
-        # body_force +=
-        pass
+        body_force += particle_force[i]
 
     # computer the torque for rigid body
     body_torque = ti.Vector([0.0, 0.0, 0.0])
     for i in ti.grouped(particle_vertices):
         # TODO 4: compute the torque for rigid body
         # Hint: use ti.math.cross(v1, v2) to compute the cross product
-        # torque +=
-        pass
+        r = particle_vertices[i] - body_cm_position[None]
+        body_torque += ti.math.cross(r, particle_force[i])
 
     # update the rigid body
     # TODO 5: update the center of mass position and velocity
-    # body_velocity[None] +=
-    # body_cm_position[None] +=
+    body_velocity[None] += (body_force / body_mass) * dt
+    body_cm_position[None] += body_velocity[None] * dt
 
     # TODO 6: update the rotation quaternion
-    # d_q = 0.5 * quaternion_multiplication(ti.Vector([0, ?, ?, ?]), body_rotation_quaternion[None])
-    # body_rotation_quaternion[None] +=
+    omega = body_angular_velocity[None]
+    omega_quat = ti.Vector([0.0, omega[0], omega[1], omega[2]])
+    d_q = 0.5 * quaternion_multiplication(omega_quat, body_rotation_quaternion[None])
+    body_rotation_quaternion[None] += d_q * dt
 
     # normalize the quaternion to avoid numerical error
     body_rotation_quaternion[None] /= body_rotation_quaternion[None].norm()
@@ -192,6 +193,10 @@ def substep():
 
     # TODO 7: update, the angular momentum, inertia tensor and angular velocity
     # hint: use A @ B to do matrix multiplication, use A.transpose() to get the transpose of A
+    body_angular_momentum[None] += body_torque * dt
+    body_inverse_inertia = body_rotation[None] @ body_origin_inverse_inertia[None] @ body_rotation[
+        None].transpose()
+    body_angular_velocity[None] = body_inverse_inertia[None] @ body_angular_momentum[None]
     # body_angular_momentum[None] =
     # body_inverse_inertia =
     # body_angular_velocity[None] =
