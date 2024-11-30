@@ -143,7 +143,7 @@ def substep():
     # computer the force on each particle
     for i in ti.grouped(particle_vertices):
         # TODO 2: gravity
-        particle_force[i] = particle_mass * gravity[None]
+        particle_force[i] = particle_mass * gravity
 
         # Collision force, we use a spring model to simulate the collision
         if particle_vertices[i][1] < -1:
@@ -178,7 +178,7 @@ def substep():
 
     # update the rigid body
     # TODO 5: update the center of mass position and velocity
-    body_velocity[None] += (body_force / body_mass) * dt
+    body_velocity[None] += (body_force / body_mass[None]) * dt
     body_cm_position[None] += body_velocity[None] * dt
 
     # TODO 6: update the rotation quaternion
@@ -196,7 +196,7 @@ def substep():
     body_angular_momentum[None] += body_torque * dt
     body_inverse_inertia = body_rotation[None] @ body_origin_inverse_inertia[None] @ body_rotation[
         None].transpose()
-    body_angular_velocity[None] = body_inverse_inertia[None] @ body_angular_momentum[None]
+    body_angular_velocity[None] = body_inverse_inertia @ body_angular_momentum[None]
     # body_angular_momentum[None] =
     # body_inverse_inertia =
     # body_angular_velocity[None] =
@@ -223,7 +223,7 @@ for i in range(len(vertices_list)):
     frame_vertices[i] = ti.Vector(vertices_list[i])
 
 window = ti.ui.Window("Rigid Body Simulation", (1024, 1024),
-                      vsync=True)
+                      vsync=True, fps_limit=60)
 canvas = window.get_canvas()
 canvas.set_background_color((1, 1, 1))
 scene = ti.ui.Scene()
