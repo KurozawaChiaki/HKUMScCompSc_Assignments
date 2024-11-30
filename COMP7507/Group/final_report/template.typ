@@ -53,8 +53,10 @@
 
 #let project(
   title: "",
+  group: "",
   authors: (),
-  logo: none,
+  logo: "images/University_of_Hong_Kong.svg.png",
+  content_table: true,
   body
 ) = {
   // Set the document's basic properties.
@@ -64,10 +66,27 @@
   set heading(numbering: "1.1")
   set par(justify: true)
 
+  // Logo
+  if logo != none {
+
+    align(center, image(logo, width: 26%))
+    v(40pt)
+  } else {
+    v(0.75fr)
+  }
+
   // Title page.
-  v(0.25fr)
   align(center)[
-    #text(2em, weight: 700, title)
+    #grid(
+      rows: (auto, auto),
+      row-gutter: 15pt,
+      [
+        #text(2em, weight: 700, title)
+      ],
+      [
+        #text(1.5em, weight: 500, group)
+      ]
+    )
   ]
 
   // Author information.
@@ -86,20 +105,12 @@
     ),
   )
 
-  // Logo
-  if logo != none {
-    v(0.25fr)
-    align(center, image(logo, width: 26%))
-    v(0.50fr)
-  } else {
-    v(0.75fr)
-  }
+  pagebreak()
   
-  pagebreak()
-
-  // Table of contents.
-  outline(depth: 3, indent: true)
-  pagebreak()
+  if content_table {
+    outline(depth: 3, indent: true)
+    pagebreak()
+  }
 
 
   // Main body.
