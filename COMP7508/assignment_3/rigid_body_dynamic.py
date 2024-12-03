@@ -51,13 +51,13 @@ body_mass = ti.field(float, shape=())
 # Simulation parameters, feel free to change them
 # We assume all particles have the same mass
 particle_mass = 1
-initial_velocity = ti.Vector([0.0, 0.0, 0.0])
+initial_velocity = ti.Vector([3.0, 0.0, 0.0])
 initial_angular_velocity = ti.Vector([0.0, 0, 0.0])
 gravity = ti.Vector([0.0, -9.8, 0.0])
 # stiffness of the collision
 collision_stiffness = 1e4
 velocity_damping_stiffness = 1e3
-friction_stiffness = 0.1
+friction_stiffness = 0.5
 # simulation integration time step
 dt = 1e-3
 
@@ -149,18 +149,67 @@ def substep():
         if particle_vertices[i][1] < -1:
             f_collision = collision_stiffness * (-1 - particle_vertices[i][1])
             particle_force[i] += ti.Vector([0, f_collision, 0])
+
+            v = particle_velocities[i]
+            tangential_velocity = ti.Vector([v[0], 0.0, v[2]])
+            vt_magnitude = tangential_velocity.norm()
+
+            if vt_magnitude > 1e-5:
+                tangential_direction = tangential_velocity / vt_magnitude
+                f_friction = -friction_stiffness * abs(f_collision) * tangential_direction
+                particle_force[i] += ti.Vector([f_friction[0], 0.0, f_friction[2]])
+
         if particle_vertices[i][0] < -1:
             f_collision = collision_stiffness * (-1 - particle_vertices[i][0])
             particle_force[i] += ti.Vector([f_collision, 0, 0])
+
+            v = particle_velocities[i]
+            tangential_velocity = ti.Vector([0.0, v[1], v[2]])
+            vt_magnitude = tangential_velocity.norm()
+
+            if vt_magnitude > 1e-5:
+                tangential_direction = tangential_velocity / vt_magnitude
+                f_friction = -friction_stiffness * abs(f_collision) * tangential_direction
+                particle_force[i] += ti.Vector([0.0, f_friction[1], f_friction[2]])
+
         if particle_vertices[i][0] > 1:
             f_collision = collision_stiffness * (1 - particle_vertices[i][0])
             particle_force[i] += ti.Vector([f_collision, 0, 0])
+
+            v = particle_velocities[i]
+            tangential_velocity = ti.Vector([0.0, v[1], v[2]])
+            vt_magnitude = tangential_velocity.norm()
+
+            if vt_magnitude > 1e-5:
+                tangential_direction = tangential_velocity / vt_magnitude
+                f_friction = -friction_stiffness * abs(f_collision) * tangential_direction
+                particle_force[i] += ti.Vector([0.0, f_friction[1], f_friction[2]])
+
         if particle_vertices[i][2] < -1:
             f_collision = collision_stiffness * (-1 - particle_vertices[i][2])
             particle_force[i] += ti.Vector([0, 0, f_collision])
+
+            v = particle_velocities[i]
+            tangential_velocity = ti.Vector([v[0], v[1], 0.0])
+            vt_magnitude = tangential_velocity.norm()
+
+            if vt_magnitude > 1e-5:
+                tangential_direction = tangential_velocity / vt_magnitude
+                f_friction = -friction_stiffness * abs(f_collision) * tangential_direction
+                particle_force[i] += ti.Vector([f_friction[0], f_friction[1], 0.0])
+
         if particle_vertices[i][2] > 1:
             f_collision = collision_stiffness * (1 - particle_vertices[i][2])
             particle_force[i] += ti.Vector([0, 0, f_collision])
+
+            v = particle_velocities[i]
+            tangential_velocity = ti.Vector([v[0], v[1], 0.0])
+            vt_magnitude = tangential_velocity.norm()
+
+            if vt_magnitude > 1e-5:
+                tangential_direction = tangential_velocity / vt_magnitude
+                f_friction = -friction_stiffness * abs(f_collision) * tangential_direction
+                particle_force[i] += ti.Vector([f_friction[0], f_friction[1], 0.0])
 
     # computer the force for rigid body
     body_force = ti.Vector([0.0, 0.0, 0.0])
@@ -181,6 +230,8 @@ def substep():
     body_velocity[None] += (body_force / body_mass[None]) * dt
     body_cm_position[None] += body_velocity[None] * dt
 
+    # body_velocity[None] *= (1.0 - velocity_damping_stiffness) * dt
+
     # TODO 6: update the rotation quaternion
     omega = body_angular_velocity[None]
     omega_quat = ti.Vector([0.0, omega[0], omega[1], omega[2]])
@@ -197,9 +248,7 @@ def substep():
     body_inverse_inertia = body_rotation[None] @ body_origin_inverse_inertia[None] @ body_rotation[
         None].transpose()
     body_angular_velocity[None] = body_inverse_inertia @ body_angular_momentum[None]
-    # body_angular_momentum[None] =
-    # body_inverse_inertia =
-    # body_angular_velocity[None] =
+    # body_angular_velocity[None] *= (1.0 - velocity_damping_stiffness) * dt
 
     # update the particles
     for i in ti.grouped(particle_vertices):
