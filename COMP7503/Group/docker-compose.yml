@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  node-red:
+    image: nodered/node-red
+    ports:
+      - "1880:1880"
+    volumes:
+      - /opt/node_red:/data
+    networks:
+      - smartcity-net
+
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - /opt/mongodb:/data/db
+    networks:
+      - smartcity-net
+
+networks:
+  smartcity-net:

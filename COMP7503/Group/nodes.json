@@ -1,0 +1,773 @@
+[
+    {
+        "id": "5e5310f94981559f",
+        "type": "inject",
+        "z": "62bfcd99a16a4e83",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 60,
+        "wires": [
+            [
+                "48c806e003028eee"
+            ]
+        ]
+    },
+    {
+        "id": "48c806e003028eee",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "InitMsg",
+        "func": "msg = {\n    city:\"\",\n    country:\"\",\n    basic_api:\"\",\n    air_api:\"\",\n    data:{\n        pack: \"\",\n        max_temperatures: [],\n        min_temperatures: [],\n        dates: [],\n        save: []\n    },\n    topic:\"\",\n    payload:{\n        urls:\"\"\n    },\n    debug: []\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 100,
+        "wires": [
+            [
+                "38df8a19e3df22d9"
+            ]
+        ]
+    },
+    {
+        "id": "f02f3769021040c2",
+        "type": "ui_button",
+        "z": "62bfcd99a16a4e83",
+        "name": "",
+        "group": "7f359c0c73543b81",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Get Weather",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 130,
+        "y": 120,
+        "wires": [
+            [
+                "48c806e003028eee"
+            ]
+        ]
+    },
+    {
+        "id": "38df8a19e3df22d9",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "Config",
+        "func": "msg.url = \"https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=en\"\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 160,
+        "wires": [
+            [
+                "0395c36795867fa8"
+            ]
+        ]
+    },
+    {
+        "id": "0395c36795867fa8",
+        "type": "http request",
+        "z": "62bfcd99a16a4e83",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 520,
+        "y": 100,
+        "wires": [
+            [
+                "04f42e84c076fe97"
+            ]
+        ]
+    },
+    {
+        "id": "04f42e84c076fe97",
+        "type": "json",
+        "z": "62bfcd99a16a4e83",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 590,
+        "y": 160,
+        "wires": [
+            [
+                "170b978e2fdba363"
+            ]
+        ]
+    },
+    {
+        "id": "9a9721e89b2501ee",
+        "type": "ui_text",
+        "z": "62bfcd99a16a4e83",
+        "group": "741b7d3484b4a03b",
+        "order": 0,
+        "width": "6",
+        "height": "9",
+        "name": "",
+        "label": "General Situation",
+        "format": "{{msg.data.pack.generalSituation}}",
+        "layout": "col-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 970,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "170b978e2fdba363",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "handleInput",
+        "func": "msg.data.pack = msg.payload;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 710,
+        "y": 100,
+        "wires": [
+            [
+                "9a9721e89b2501ee",
+                "50d55cbdd0d8cd6a"
+            ]
+        ]
+    },
+    {
+        "id": "50d55cbdd0d8cd6a",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "GetTemperatureLine",
+        "func": "var dates = [];\nvar i = 0;\nfor (i = 0; i < 9; i++) {\n    var forecast = msg.data.pack.weatherForecast[i];\n    msg.data.dates.push(forecast.forecastDate);\n    msg.data.max_temperatures.push(forecast.forecastMaxtemp.value);\n    msg.data.min_temperatures.push(forecast.forecastMintemp.value);\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 220,
+        "wires": [
+            [
+                "8439289a0fd9e379"
+            ]
+        ]
+    },
+    {
+        "id": "bd1bc625e3cc3343",
+        "type": "ui_chart",
+        "z": "62bfcd99a16a4e83",
+        "name": "",
+        "group": "4319d4731875a6f4",
+        "order": 0,
+        "width": "6",
+        "height": "3",
+        "label": "Max & Min Temperatures",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "Y-M-D",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": true,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 990,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8439289a0fd9e379",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "FormatChart",
+        "func": "var data = {\"min\": [], \"max\": []};\nvar i, j;\n\nfor (i = 0; i < 9; i++) {\n    data[\"min\"].push({\"x\": msg.data.dates[i], \"y\": msg.data.min_temperatures[i]});\n    data[\"max\"].push({\"x\": msg.data.dates[i], \"y\": msg.data.max_temperatures[i]});\n}\n\nmsg.data.save.push(data);\nmsg.payload = [{\"series\": Object.keys(data), \"data\": Object.values(data), \"labels\": \"\"}];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 280,
+        "wires": [
+            [
+                "bd1bc625e3cc3343",
+                "272dcd289c68d025"
+            ]
+        ]
+    },
+    {
+        "id": "2cac588831155780",
+        "type": "mongodb3 in",
+        "z": "62bfcd99a16a4e83",
+        "service": "_ext_",
+        "configNode": "5d3b113fa04e64fd",
+        "name": "",
+        "collection": "Weather",
+        "operation": "insert",
+        "x": 523,
+        "y": 755,
+        "wires": [
+            [
+                "294f26d93da20f26"
+            ]
+        ]
+    },
+    {
+        "id": "7418d602a8d5f80f",
+        "type": "mongodb3 in",
+        "z": "62bfcd99a16a4e83",
+        "service": "_ext_",
+        "configNode": "5d3b113fa04e64fd",
+        "name": "Retrieve Last Record",
+        "collection": "Weather",
+        "operation": "findOne",
+        "x": 466,
+        "y": 540,
+        "wires": [
+            [
+                "7695f8d5b2d79f7e"
+            ]
+        ]
+    },
+    {
+        "id": "f7fbbfd8e9986e17",
+        "type": "inject",
+        "z": "62bfcd99a16a4e83",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "300",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "Timer",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 540,
+        "wires": [
+            [
+                "0a48d15c6ac53c07"
+            ]
+        ]
+    },
+    {
+        "id": "0a48d15c6ac53c07",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "Retrieve Last Record Query",
+        "func": "msg.payload = [\n    {\n        \"$query\": {}\n    },\n    {\n        \"sort\": {\n            \"_id\": -1\n        }\n    }\n]\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 344,
+        "y": 607,
+        "wires": [
+            [
+                "7418d602a8d5f80f"
+            ]
+        ]
+    },
+    {
+        "id": "7695f8d5b2d79f7e",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "Get Last updateTime",
+        "func": "if(msg.payload.hasOwnProperty('updateTime')) {\n    flow.set('lastUpdateTime', msg.payload.updateTime);\n} else {\n    flow.set('lastUpdateTime', \"\");\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 642,
+        "y": 607,
+        "wires": [
+            [
+                "1aedcc4d7d600468"
+            ]
+        ]
+    },
+    {
+        "id": "1aedcc4d7d600468",
+        "type": "http request",
+        "z": "62bfcd99a16a4e83",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=en",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 295,
+        "y": 663,
+        "wires": [
+            [
+                "2afb4f05217bbd47"
+            ]
+        ]
+    },
+    {
+        "id": "2afb4f05217bbd47",
+        "type": "json",
+        "z": "62bfcd99a16a4e83",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 444,
+        "y": 663,
+        "wires": [
+            [
+                "734f5087a7dbecb2"
+            ]
+        ]
+    },
+    {
+        "id": "734f5087a7dbecb2",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "New Record Available",
+        "func": "lastUpdateTime = flow.get('lastUpdateTime');\n\nvar updateTimeTemp = new Date(msg.payload.updateTime)\nvar updateTime = updateTimeTemp.toISOString() ;\n\nif(updateTime > lastUpdateTime) {\n    msg.needUpdate = true ;\n    msg.payload.updateTime = updateTime ;\n} else {\n    msg.needUpdate = false ;\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 2,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 639,
+        "y": 663,
+        "wires": [
+            [
+                "219970388e516804"
+            ]
+        ]
+    },
+    {
+        "id": "219970388e516804",
+        "type": "switch",
+        "z": "62bfcd99a16a4e83",
+        "name": "Need Update",
+        "property": "needUpdate",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "false",
+                "vt": "jsonata"
+            },
+            {
+                "t": "eq",
+                "v": "true",
+                "vt": "jsonata"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 304,
+        "y": 720,
+        "wires": [
+            [
+                "cf362b0ba85d05bf"
+            ],
+            [
+                "2cac588831155780"
+            ]
+        ]
+    },
+    {
+        "id": "cf362b0ba85d05bf",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "No Update",
+        "func": "msg.payload = \"No Update\"\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 495,
+        "y": 713,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "294f26d93da20f26",
+        "type": "debug",
+        "z": "62bfcd99a16a4e83",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 713,
+        "y": 755,
+        "wires": []
+    },
+    {
+        "id": "6fbd732dbba03129",
+        "type": "ui_chart",
+        "z": "62bfcd99a16a4e83",
+        "name": "",
+        "group": "4319d4731875a6f4",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "Max Temperatures Changes",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "Y-M-D",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": true,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1000,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "daf51959de29f220",
+        "type": "mongodb3 in",
+        "z": "62bfcd99a16a4e83",
+        "service": "_ext_",
+        "configNode": "5d3b113fa04e64fd",
+        "name": "Retrieve Last Record",
+        "collection": "Weather",
+        "operation": "find.toArray",
+        "x": 480,
+        "y": 440,
+        "wires": [
+            [
+                "8592fdc6bcd4a0a7",
+                "3c82ac6fd8dfaf85",
+                "3bf207d7deb76220"
+            ]
+        ]
+    },
+    {
+        "id": "272dcd289c68d025",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "Retrieve Last Record Query",
+        "func": "msg.payload = [\n    {\n        \"$query\": {}\n    },\n    {\n        \"sort\": {\n            \"_id\": -1\n        }\n    }\n]\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 380,
+        "wires": [
+            [
+                "daf51959de29f220"
+            ]
+        ]
+    },
+    {
+        "id": "8592fdc6bcd4a0a7",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "Format Former Chart",
+        "func": "if (!msg?.payload?.weatherForecast || !msg?.data?.pack?.weatherForecast) {\n    return { error: \"Missing required data\" };\n}\n\nconst former = msg.payload.weatherForecast;\n\nnode.log(\"hello!\");\nnode.log(former?.weatherForecast?.[0]?.forecastDate);\nnode.log(msg.data.pack?.weatherForecast[0]?.forecastDate);\n\nif (former?.updateTime === msg.data.pack?.updateTime || \n    msg.data.pack?.weatherForecast[0]?.forecastDate === former?.weatherForecast?.[0]?.forecastDate) {\n    var data = {\"today\": []};\n    var i;\n\n    for (i = 0; i < 9; i++) {\n        if (msg.data.dates[i] !== undefined && msg.data.max_temperatures[i] !== undefined) {\n            data[\"today\"].push({\n                \"x\": msg.data.dates[i], \n                \"y\": msg.data.max_temperatures[i]\n            });\n        }\n    }\n\n    msg.data.save.push(data);\n    msg.payload = [{\"series\": Object.keys(data), \"data\": Object.values(data), \"labels\": \"\"}];\n\n    return msg;\n}\n\nvar i, j;\nvar total_data = {\"yesterday\": [], \"today\": []};\n\nvar past_data = {\"dates\": [], \"max_temperatures\": []};\nfor (i = 0; i < 9; i++) {\n    var forecast = msg.data.pack.weatherForecast[i];\n    past_data.dates.push(forecast.forecastDate);\n    past_data.max_temperatures.push(forecast.forecastMaxtemp.value);\n}\n\nfor (i = 0; i < 9; i++) {\n    if (i == 0) {\n        total_data.yesterday.push({\"x\": past_data.dates[i], \"y\": past_data.max_temperatures[i]});\n        continue;\n    }\n\n    total_data.yesterday.push({\"x\": past_data.dates[i], \"y\": past_data.max_temperatures[i]});\n    total_data.today.push({\"x\": msg.data.dates[i - 1], \"y\": msg.data.max_temperatures[i - 1]});\n\n}\n\nmsg.payload = [{\"series\": Object.keys(total_data), \"data\": Object.values(total_data), \"labels\": \"\"}];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 380,
+        "wires": [
+            [
+                "6fbd732dbba03129"
+            ]
+        ]
+    },
+    {
+        "id": "3c82ac6fd8dfaf85",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "Format Former Chart 2",
+        "func": "if (!msg?.payload?.weatherForecast || !msg?.data?.pack?.weatherForecast) {\n    return { error: \"Missing required data\" };\n}\n\nconst former = msg.payload.weatherForecast;\n\nnode.log(\"hello!\");\nnode.log(former?.weatherForecast?.[0]?.forecastDate);\nnode.log(msg.data.pack?.weatherForecast[0]?.forecastDate);\n\nif (former?.updateTime === msg.data.pack?.updateTime || \n    msg.data.pack?.weatherForecast[0]?.forecastDate === former?.weatherForecast?.[0]?.forecastDate) {\n    var data = {\"today\": []};\n    var i;\n\n    for (i = 0; i < 9; i++) {\n        if (msg.data.dates[i] !== undefined && msg.data.min_temperatures[i] !== undefined) {\n            data[\"today\"].push({\n                \"x\": msg.data.dates[i], \n                \"y\": msg.data.min_temperatures[i]\n            });\n        }\n    }\n\n    msg.data.save.push(data);\n    msg.payload = [{\"series\": Object.keys(data), \"data\": Object.values(data), \"labels\": \"\"}];\n\n    return msg;\n}\n\nvar i, j;\nvar total_data = {\"yesterday\": [], \"today\": []};\n\nvar past_data = {\"dates\": [], \"min_temperatures\": []};\nfor (i = 0; i < 9; i++) {\n    var forecast = msg.data.pack.weatherForecast[i];\n    past_data.dates.push(forecast.forecastDate);\n    past_data.min_temperatures.push(forecast.forecastMintemp.value);\n}\n\nfor (i = 0; i < 9; i++) {\n    if (i == 0) {\n        total_data.yesterday.push({\"x\": past_data.dates[i], \"y\": past_data.min_temperatures[i]});\n        continue;\n    }\n\n    total_data.yesterday.push({\"x\": past_data.dates[i], \"y\": past_data.min_temperatures[i]});\n    total_data.today.push({\"x\": msg.data.dates[i - 1], \"y\": msg.data.min_temperatures[i - 1]});\n\n}\n\nmsg.payload = [{\"series\": Object.keys(total_data), \"data\": Object.values(total_data), \"labels\": \"\"}];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 420,
+        "wires": [
+            [
+                "5ccb04626e35216b"
+            ]
+        ]
+    },
+    {
+        "id": "5ccb04626e35216b",
+        "type": "ui_chart",
+        "z": "62bfcd99a16a4e83",
+        "name": "",
+        "group": "4319d4731875a6f4",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "Min Temperature Changes",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "Y-M-D",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": true,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1000,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3bf207d7deb76220",
+        "type": "function",
+        "z": "62bfcd99a16a4e83",
+        "name": "NextDayForecasts",
+        "func": "let formerForecasts = msg.payload;\n\nlet currentDateTemp = msg.data.dates[0];\n\nlet parseDate = inputString => {\n    let dateInt = parseInt(inputString);\n    let dateYear = parseInt(dateInt / 10000);\n    let dateMonth = parseInt((dateInt % 10000) / 100) - 1;\n    let dateDay = parseInt(dateInt % 100);\n\n    return new Date(dateYear, dateMonth, dateDay);\n};\n\nlet currentDate = parseDate(currentDateTemp);\n\nvar data = {\"min\": [], \"max\": []};\n\nlet currentUpdateTime = new Date(msg.data.pack.updateTime);\ndata[\"min\"].push({\"x\": currentUpdateTime, \"y\": msg.data.min_temperatures[0]});\ndata[\"max\"].push({\"x\": currentUpdateTime, \"y\": msg.data.max_temperatures[0]});\n\nfor (var i = 0; i < Object.keys(formerForecasts).length; i++) {\n    var forecast = formerForecasts[i];\n    var weathers = forecast.weatherForecast;\n    \n    for (var j = 0; j < Object.keys(weathers).length; j++) {\n        var weather = weathers[j];\n        if (parseDate(weather.forecastDate).toISOString() == currentDate.toISOString()) {\n            let forecastTime = new Date(forecast.updateTime);\n\n            if (forecastTime.toISOString() == currentUpdateTime.toISOString()) continue;\n            data[\"max\"].push({\"x\": forecastTime, \"y\": weather.forecastMaxtemp.value});\n            data[\"min\"].push({\"x\": forecastTime, \"y\": weather.forecastMintemp.value});\n        }\n    }\n}\n\nmsg.payload = [{\"series\": Object.keys(data), \"data\": Object.values(data), \"labels\": \"\"}];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 710,
+        "y": 480,
+        "wires": [
+            [
+                "ded389cc1ad61ae5"
+            ]
+        ]
+    },
+    {
+        "id": "ded389cc1ad61ae5",
+        "type": "ui_chart",
+        "z": "62bfcd99a16a4e83",
+        "name": "",
+        "group": "4319d4731875a6f4",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Next Day Temperature Forecasts",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": true,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1020,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7f359c0c73543b81",
+        "type": "ui_group",
+        "name": "GetWeather",
+        "tab": "772d04835920c2f1",
+        "order": 2,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "741b7d3484b4a03b",
+        "type": "ui_group",
+        "name": "WeatherBasicInfo",
+        "tab": "772d04835920c2f1",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "4319d4731875a6f4",
+        "type": "ui_group",
+        "name": "Temperatures",
+        "tab": "772d04835920c2f1",
+        "order": 4,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "5d3b113fa04e64fd",
+        "type": "mongodb3",
+        "uri": "mongodb://mongo:27017",
+        "name": "KMB",
+        "options": "",
+        "parallelism": -1
+    },
+    {
+        "id": "772d04835920c2f1",
+        "type": "ui_tab",
+        "name": "Home",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
